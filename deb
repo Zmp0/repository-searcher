@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# Script to search for and install packages from Nala (APT) or Snap with colorful output and verbose logging.
+
+# Global variables
+VERBOSE=true
+SEARCH_ONLY=true 
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Function to log messages if verbose mode is enabled
+log() {
+    if [ "$VERBOSE" = true ]; then
+        echo -e "$1"
+    fi
+}
+
+# Function to print error messages in red
+error() {
+    echo -e "${RED}$1${NC}"
+}
+
+# Function to print success messages in green
+success() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+# Function to print informational messages in blue
+info() {
+    echo -e "${BLUE}$1${NC}"
+}
+
+# Function to print Snap-related messages in cyan and magenta
+snap_message() {
+    echo -e "${CYAN}$1${MAGENTA}$2${NC}"
+}
+
+# Function to check if the package is available in the Nala repository
+check_nala_repository() {
+    package_name="$1"
+    log "${YELLOW}Checking if '$package_name' is available in the Nala (APT) repository...${NC}"
+
+    nala_results=$(nala search "$package_name"  )
+
+    if [ -n "$nala_results" ]; then
+        log "${GREEN}'$package_name' found in the Nala repository.${NC}"
+        echo -e "${BLUE}Nala Search Results:${GREEN}\n$(echo "$nala_results" | sed 's/^/    /')"
+        if [ "$SEARCH_ONLY" = false ]; then
+            info "Installing '$package_name' from the Nala repository..."
+            sudo nala install -y "$package_name"
+            exit 0
+        fi
+    else
+        log "${RED}'$package_name' is not available in the Nala repository.${NC}"
+    fi
+}
+
+# Function to search for the package in Snap and let the user select from the results
+check_snap() {
+    package_name="$1"
+    log "${YELLOW}Searching for '$package_name' in Snap...${NC}"
+
+    snap_results=$(snap find "$package_name" | grep -E '^[a-z0-9-]+ ' | head )
+
+    if [ -z "$snap_results" ]; then
+        error "'$package_name' is not available in Snap."
+        exit 1
+    fi
+
+    snap_message "Found the following Snap packages for '$package_name':" ""
+    IFS=$'\n'
+    options=($snap_results)
+    unset IFS
+
+    for i in "${!options[@]}"; do
+        echo -e "${CYAN}$((i + 1)). ${MAGENTA}${options[$i]}${NC}"
+    done
+
+    if [ "$SEARCH_ONLY" = true ]; then
+        exit 0
+    fi
+
+    while true; do
+        read -p "Select the number of the package to install: " choice
+        if [[ $choice -ge 1 && $choice -le ${#options[@]} ]]; then
+            selected_package=$(echo "${options[$((choice - 1))]}" | awk '{print $1}')
+            snap_message "You selected Snap package:" "$selected_package"
+            info "Installing '$selected_package' from Snap..."
+            sudo snap install "$selected_package"
+            exit 0
+        else
+            error "Invalid selection. Please try again."
+        fi
+    done
+}
+
+# Parse command-line options
+while getopts "vs" opt; do
+    case $opt in
+        v)
+            VERBOSE=true
+            ;;
+        s)
+            SEARCH_ONLY=true
+            ;;
+        *)
+            error "Usage: $0 <package_name>"
+            exit 1
+            ;;
+    esac
+done
+
+shift $((OPTIND -1))
+
+# Check for input query
+if [ $# -eq 0 ]; then
+    error "Usage: $0 <package_name>"
+    exit 1
+fi
+
+package_name="$*"
+
+# 1. Check if the package is in the Nala (APT) repository
+check_nala_repository "$package_name"
+
+# 2. If not found, check if the package is available in Snap
+check_snap "$package_name"
+
+# 3. If neither is available, show an error message
+error "'$package_name' is not available in Nala or Snap."
