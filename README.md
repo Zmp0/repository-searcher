@@ -2,7 +2,7 @@
 
 ## - A repository search for exact names
 
-### This script search on the repository of apt and snap for packages,it need nala and snap for work,so first of all 
+### This script search on the repository of apt and snap for packages,it need nala and snap for work.
 
 ```bash
 sudo apt install nala snapd -y 
@@ -10,10 +10,12 @@ sudo apt install nala snapd -y
 
 ---
 
-### After installing nala and snap download the repository and copy the file on /usr/local/bin
+### After installing nala and snap download the repository and copy the file on /usr/local/bin,all the code of installation is into this line
+
+- Install the script by only coping this line
 
 ```bash 
-git clone https://github.com/Zmp0/repository-searcher.git && cd repository-searcher && sudo cp deb /usr/local/bin && sudo chmod +x /usr/local/bin/deb
+git clone https://github.com/Zmp0/repository-searcher.git && cd repository-searcher && sudo cp deb /usr/local/bin && sudo chmod +x /usr/local/bin/deb && sudo apt install nala snapd -y 
 ```
 
 ---
