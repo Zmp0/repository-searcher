@@ -80,7 +80,7 @@ check_snap() {
     unset IFS
 
     for i in "${!options[@]}"; do
-        echo -e "${CYAN}$((i + 1)). ${MAGENTA}${options[$i]}${NC}"
+        echo -e "${MAGENTA}$((i + 1)). ${CYAN}${options[$i]}${NC}"
     done
 
     if [ "$SEARCH_ONLY" = true ]; then
