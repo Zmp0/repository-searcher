@@ -13,7 +13,7 @@ sudo apt install nala snapd -y
 ### After installing nala and snap download the repository and copy the file on /usr/local/bin
 
 ```bash 
-git clone https://github.com/Zmp0/repository-searcher.git && cd repository-searcher && sudo cp deb /usr/local/bin && chmod +x /usr/local/bin/deb
+git clone https://github.com/Zmp0/repository-searcher.git && cd repository-searcher && sudo cp deb /usr/local/bin && sudo chmod +x /usr/local/bin/deb
 ```
 
 ---
