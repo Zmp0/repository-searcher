@@ -33,3 +33,18 @@ deb konsole
 ```bash
 deb kde
 ```
+
+
+### You can also install packages from snap and apt with the " -s " subcommand
+
+```bash
+deb -s firefox
+```
+
+```bash
+deb -s konsole
+```
+
+```bash
+deb -s kde
+```
